@@ -7,7 +7,10 @@
     class="list-group-item">
     <button
     (click) = "updatePost(post)" 
-    class="btn btn-default btn-sm">Update</button>
+    class="btn btn-default btn-success btn-sm float-left">Update</button>
+    <button
+    (click) = "deletePost(post)" 
+    class="btn btn-default btn-danger btn-sm float-right">Delete</button>
     {{ post.title }}
   </li>
 </ul>
