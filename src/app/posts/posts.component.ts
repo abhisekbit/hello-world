@@ -14,15 +14,8 @@ export class PostsComponent implements OnInit {
   posts: any[];
 
   ngOnInit() {
-    this.service.getPosts()
-    .subscribe(
-      response => {
-      this.posts = response.json() ;
-      },
-      error => {
-        alert('Unexpected error occured');
-        console.log(error);
-      });
+    this.service.getAll()
+    .subscribe(posts => this.posts = posts);
   }
 
   constructor(private service: PostService) {
@@ -31,50 +24,44 @@ export class PostsComponent implements OnInit {
   createPost(input: HTMLInputElement) {
     // tslint:disable-next-line:prefer-const
     let post = { title: input.value };
+    this.posts.splice(0, 0, post);
+
     input.value = '';
-    this.service.createPost(post)
+    this.service.create(post)
         .subscribe(
-          response => {
-          post['id'] = response.json().id;
-          this.posts.splice(0, 0, post);
+          newPost => {
+          post['id'] = newPost.id;
           },
           (error: AppError) => {
+            this.posts.splice(0, 1);
             // tslint:disable-next-line:curly
             if (error instanceof BadRequestError)
               alert('Bad Request Error');
-            else {
-              alert('Unexpected error occured');
-              console.log(error);
-            }
+            // tslint:disable-next-line:curly
+            else throw error ;
           });
   }
   updatePost(post) {
-    this.service.updatePost(post)
+    this.service.update(post)
         .subscribe(
-          resposne => {
-            console.log(resposne.json());
-          },
-          error => {
-            alert('Unexpected error occured');
-            console.log(error);
+          updatedPost => {
+            console.log(updatedPost);
           });
   }
   deletePost(post) {
-    this.service.deletePost(post.id)
+    // tslint:disable-next-line:prefer-const
+    let index = this.posts.indexOf(post);
+    this.posts.splice(index, 1);
+    this.service.delete(post.id)
         .subscribe(
-          response => {
-          // tslint:disable-next-line:prefer-const
-          let index = this.posts.indexOf(post);
-          this.posts.splice(index, 1);
-          },
+          null,
           (error: AppError) => {
+            this.posts.splice(index, 0, post);
             // tslint:disable-next-line:curly
             if (error instanceof NotFoundError)
               alert('This post has already been deleted');
-            else {
-              alert('Unexpected error occured');
-              console.log(error);
-            }
+            // tslint:disable-next-line:curly
+            else throw error ;
           });
   }
 
